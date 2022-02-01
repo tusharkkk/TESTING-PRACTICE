@@ -1,0 +1,41 @@
+public class BrowseTab {
+	public static void main(String[] args) throws InterruptedException {
+		 System.setProperty("webdriver.chrome.driver","C:\\Users\\TKhade\\eclipse-workspace\\OneCAT\\chromedriver.exe");  
+		WebDriver driver =new ChromeDriver();
+		driver.manage().window().maximize();
+		driver.get("https://onecat.qa.slb.com/onecat/");
+		//driver.navigate().refresh();
+		
+		List<WebElement> links=driver.findElements(By.tagName("a"));
+		System.out.println("No of links are "+links.size());
+		List<String> urlList=new ArrayList<String>();
+		for (WebElement e:links) {
+			String url=e.getAttribute("href");
+			urlList.add(url);
+			checkBrokenLink(url);
+		}
+		urlList.parallelStream().forEach(e->checkBrokenLink(e))	;	
+		driver.quit();
+		
+	}
+	public static void checkBrokenLink(String linkUrl) {
+		try {
+			URL url=new URL(linkUrl);
+			HttpURLConnection httpurlconnection=(HttpURLConnection)url.openConnection();
+			httpurlconnection.setConnectTimeout(5000);
+			httpurlconnection.connect();
+			
+			if(httpurlconnection.getResponseCode()>=400) {
+				System.out.println(linkUrl+ "=====>"+httpurlconnection.getResponseMessage()+"is a broken link");
+			}
+			else {
+				System.out.println(linkUrl+"====>"+httpurlconnection.getResponseMessage());
+			}
+		}
+	catch(Exception e) {
+		
+	}
+	
+	}
+
+}
